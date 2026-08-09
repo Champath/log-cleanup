@@ -1,0 +1,129 @@
+2026-08-09 22:43:18 [==================================================] 
+2026-08-09 22:43:18 [INFO] Log cleanup cycle started.
+2026-08-09 22:43:18 [==================================================] 
+2026-08-09 22:43:18 [INFO] Lock acquired.
+2026-08-09 22:43:18 [INFO] Process ID: 5864
+2026-08-09 22:43:18 [INFO] Validating configuration...
+2026-08-09 22:43:18 [ERROR] Log directory does not exist: /home/champath/log-cleanup/logs/app1 /home/champath/log-cleanup/logs/app2
+2026-08-09 22:43:18 [ERROR] Configuration validation failed.
+2026-08-09 22:43:18 [INFO] Lock released.
+2026-08-09 22:43:18 [INFO] Next check in 600 seconds.
+2026-08-09 22:50:53 [==================================================] 
+2026-08-09 22:50:53 [INFO] Log cleanup cycle started.
+2026-08-09 22:50:53 [==================================================] 
+2026-08-09 22:50:53 [INFO] Lock acquired.
+2026-08-09 22:50:53 [INFO] Process ID: 6988
+2026-08-09 22:50:53 [INFO] Validating configuration...
+2026-08-09 22:50:53 [INFO] Configuration validation successful.
+2026-08-09 22:50:53 [INFO] Backup enabled: true
+2026-08-09 22:50:53 [INFO] Current disk usage: 23%
+2026-08-09 22:50:53 [INFO] Configured threshold: 80%
+2026-08-09 22:50:53 [INFO] Disk usage is below threshold.
+2026-08-09 22:50:53 [INFO] No cleanup required.
+2026-08-09 22:50:53 [INFO] Lock released.
+2026-08-09 22:50:53 [INFO] Log cleanup cycle completed successfully.
+2026-08-09 22:50:53 [INFO] Next check in 600 seconds.
+2026-08-09 22:53:50 [==================================================] 
+2026-08-09 22:53:50 [INFO] Log cleanup cycle started.
+2026-08-09 22:53:50 [==================================================] 
+2026-08-09 22:53:50 [INFO] Lock acquired.
+2026-08-09 22:53:50 [INFO] Process ID: 7286
+2026-08-09 22:53:50 [INFO] Validating configuration...
+2026-08-09 22:53:50 [INFO] Configuration validation successful.
+2026-08-09 22:53:50 [INFO] Backup enabled: true
+2026-08-09 22:53:50 [INFO] Current disk usage: 23%
+2026-08-09 22:53:50 [INFO] Configured threshold: 22%
+2026-08-09 22:53:51 [WARNING] Disk usage threshold exceeded.
+2026-08-09 22:53:51 [INFO] Starting oldest-log cleanup.
+2026-08-09 22:53:51 [INFO] Oldest log file:
+2026-08-09 22:53:51 [INFO] /home/champath/log-cleanup/logs/app1/app-2026-08-01.txt
+2026-08-09 22:53:51 [INFO] Backup is ENABLED.
+2026-08-09 22:53:51 [INFO] Backing up:
+2026-08-09 22:53:51 [INFO] Source      : /home/champath/log-cleanup/logs/app1/app-2026-08-01.txt
+2026-08-09 22:53:51 [INFO] Destination : /home/champath/log-cleanup/backup/20260809_225351_app-2026-08-01.txt
+2026-08-09 22:53:51 [INFO] Backup verified successfully.
+2026-08-09 22:53:51 [INFO] Backup successful. Proceeding with deletion.
+2026-08-09 22:53:51 [INFO] Deleting: /home/champath/log-cleanup/logs/app1/app-2026-08-01.txt
+2026-08-09 22:53:51 [INFO] Successfully deleted: /home/champath/log-cleanup/logs/app1/app-2026-08-01.txt
+2026-08-09 22:53:51 [INFO] Current disk usage: 23%
+2026-08-09 22:53:51 [INFO] Configured threshold: 22%
+2026-08-09 22:53:51 [WARNING] Disk usage threshold exceeded.
+2026-08-09 22:53:51 [INFO] Starting oldest-log cleanup.
+2026-08-09 22:53:51 [INFO] Oldest log file:
+2026-08-09 22:53:51 [INFO] /home/champath/log-cleanup/logs/app1/app-2026-08-02.txt
+2026-08-09 22:53:51 [INFO] Backup is ENABLED.
+2026-08-09 22:53:51 [INFO] Backing up:
+2026-08-09 22:53:51 [INFO] Source      : /home/champath/log-cleanup/logs/app1/app-2026-08-02.txt
+2026-08-09 22:53:51 [INFO] Destination : /home/champath/log-cleanup/backup/20260809_225351_app-2026-08-02.txt
+2026-08-09 22:53:51 [INFO] Backup verified successfully.
+2026-08-09 22:53:51 [INFO] Backup successful. Proceeding with deletion.
+2026-08-09 22:53:51 [INFO] Deleting: /home/champath/log-cleanup/logs/app1/app-2026-08-02.txt
+2026-08-09 22:53:51 [INFO] Successfully deleted: /home/champath/log-cleanup/logs/app1/app-2026-08-02.txt
+2026-08-09 22:53:51 [INFO] Current disk usage: 23%
+2026-08-09 22:53:51 [INFO] Configured threshold: 22%
+2026-08-09 22:53:51 [WARNING] Disk usage threshold exceeded.
+2026-08-09 22:53:51 [INFO] Starting oldest-log cleanup.
+2026-08-09 22:53:51 [INFO] Oldest log file:
+2026-08-09 22:53:51 [INFO] /home/champath/log-cleanup/logs/app1/app-2026-08-03.txt
+2026-08-09 22:53:51 [INFO] Backup is ENABLED.
+2026-08-09 22:53:51 [INFO] Backing up:
+2026-08-09 22:53:51 [INFO] Source      : /home/champath/log-cleanup/logs/app1/app-2026-08-03.txt
+2026-08-09 22:53:51 [INFO] Destination : /home/champath/log-cleanup/backup/20260809_225351_app-2026-08-03.txt
+2026-08-09 22:53:51 [INFO] Backup verified successfully.
+2026-08-09 22:53:51 [INFO] Backup successful. Proceeding with deletion.
+2026-08-09 22:53:51 [INFO] Deleting: /home/champath/log-cleanup/logs/app1/app-2026-08-03.txt
+2026-08-09 22:53:51 [INFO] Successfully deleted: /home/champath/log-cleanup/logs/app1/app-2026-08-03.txt
+2026-08-09 22:53:51 [INFO] Current disk usage: 23%
+2026-08-09 22:53:51 [INFO] Configured threshold: 22%
+2026-08-09 22:53:51 [WARNING] Disk usage threshold exceeded.
+2026-08-09 22:53:51 [INFO] Starting oldest-log cleanup.
+2026-08-09 22:53:51 [INFO] Oldest log file:
+2026-08-09 22:53:51 [INFO] /home/champath/log-cleanup/logs/app2/app-2026-08-04.txt
+2026-08-09 22:53:51 [INFO] Backup is ENABLED.
+2026-08-09 22:53:51 [INFO] Backing up:
+2026-08-09 22:53:51 [INFO] Source      : /home/champath/log-cleanup/logs/app2/app-2026-08-04.txt
+2026-08-09 22:53:51 [INFO] Destination : /home/champath/log-cleanup/backup/20260809_225351_app-2026-08-04.txt
+2026-08-09 22:53:51 [INFO] Backup verified successfully.
+2026-08-09 22:53:51 [INFO] Backup successful. Proceeding with deletion.
+2026-08-09 22:53:51 [INFO] Deleting: /home/champath/log-cleanup/logs/app2/app-2026-08-04.txt
+2026-08-09 22:53:51 [INFO] Successfully deleted: /home/champath/log-cleanup/logs/app2/app-2026-08-04.txt
+2026-08-09 22:53:51 [INFO] Current disk usage: 23%
+2026-08-09 22:53:51 [INFO] Configured threshold: 22%
+2026-08-09 22:53:51 [WARNING] Disk usage threshold exceeded.
+2026-08-09 22:53:51 [INFO] Starting oldest-log cleanup.
+2026-08-09 22:53:51 [INFO] Oldest log file:
+2026-08-09 22:53:51 [INFO] /home/champath/log-cleanup/logs/app2/app-2026-08-05.txt
+2026-08-09 22:53:51 [INFO] Backup is ENABLED.
+2026-08-09 22:53:51 [INFO] Backing up:
+2026-08-09 22:53:51 [INFO] Source      : /home/champath/log-cleanup/logs/app2/app-2026-08-05.txt
+2026-08-09 22:53:51 [INFO] Destination : /home/champath/log-cleanup/backup/20260809_225351_app-2026-08-05.txt
+2026-08-09 22:53:51 [INFO] Backup verified successfully.
+2026-08-09 22:53:51 [INFO] Backup successful. Proceeding with deletion.
+2026-08-09 22:53:51 [INFO] Deleting: /home/champath/log-cleanup/logs/app2/app-2026-08-05.txt
+2026-08-09 22:53:51 [INFO] Successfully deleted: /home/champath/log-cleanup/logs/app2/app-2026-08-05.txt
+2026-08-09 22:53:51 [INFO] Current disk usage: 23%
+2026-08-09 22:53:51 [INFO] Configured threshold: 22%
+2026-08-09 22:53:51 [WARNING] Disk usage threshold exceeded.
+2026-08-09 22:53:51 [INFO] Starting oldest-log cleanup.
+2026-08-09 22:53:51 [WARNING] No matching log files found.
+2026-08-09 22:53:51 [ERROR] Cleanup stopped because processing failed.
+2026-08-09 22:53:51 [INFO] Lock released.
+2026-08-09 22:53:51 [ERROR] Log cleanup cycle completed with errors.
+2026-08-09 22:53:51 [INFO] Next check in 30 seconds.
+2026-08-09 22:54:21 [==================================================] 
+2026-08-09 22:54:21 [INFO] Log cleanup cycle started.
+2026-08-09 22:54:21 [==================================================] 
+2026-08-09 22:54:21 [INFO] Lock acquired.
+2026-08-09 22:54:21 [INFO] Process ID: 7286
+2026-08-09 22:54:21 [INFO] Validating configuration...
+2026-08-09 22:54:21 [INFO] Configuration validation successful.
+2026-08-09 22:54:21 [INFO] Backup enabled: true
+2026-08-09 22:54:21 [INFO] Current disk usage: 23%
+2026-08-09 22:54:21 [INFO] Configured threshold: 22%
+2026-08-09 22:54:21 [WARNING] Disk usage threshold exceeded.
+2026-08-09 22:54:21 [INFO] Starting oldest-log cleanup.
+2026-08-09 22:54:21 [WARNING] No matching log files found.
+2026-08-09 22:54:21 [ERROR] Cleanup stopped because processing failed.
+2026-08-09 22:54:21 [INFO] Lock released.
+2026-08-09 22:54:21 [ERROR] Log cleanup cycle completed with errors.
+2026-08-09 22:54:21 [INFO] Next check in 30 seconds.
