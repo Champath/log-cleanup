@@ -22,12 +22,10 @@ log_message() {
     echo "$timestamp [$level] $message" | tee -a "$LOG_FILE"
 }
 
-# Config validation
 validate_config() {
 
     log_message "INFO" "Validating configuration..."
 
-    # Threshold
     if ! [[ "$THRESHOLD" =~ ^[0-9]+$ ]]; then
         log_message "ERROR" "THRESHOLD must be a number."
         return 1
@@ -38,18 +36,16 @@ validate_config() {
         return 1
     fi
 
-    # Bundle percentage
-    if ! [[ "$BUNDLE_PERCENT" =~ ^[0-9]+$ ]]; then
-        log_message "ERROR" "BUNDLE_PERCENT must be a number."
+    if ! [[ "$RETENTION_DAYS" =~ ^[0-9]+$ ]]; then
+        log_message "ERROR" "RETENTION_DAYS must be a number."
         return 1
     fi
 
-    if [ "$BUNDLE_PERCENT" -lt 1 ] || [ "$BUNDLE_PERCENT" -gt 100 ]; then
-        log_message "ERROR" "BUNDLE_PERCENT must be between 1 and 100."
+    if [ "$RETENTION_DAYS" -lt 1 ]; then
+        log_message "ERROR" "RETENTION_DAYS must be at least 1."
         return 1
     fi
 
-    # Backup flag
     if [ "$BACKUP_ENABLED" != "true" ] &&
        [ "$BACKUP_ENABLED" != "false" ]; then
 
@@ -59,7 +55,6 @@ validate_config() {
         return 1
     fi
 
-    # Mount point
     if [ ! -d "$MOUNT_POINT" ]; then
 
         log_message "ERROR" \
@@ -68,7 +63,6 @@ validate_config() {
         return 1
     fi
 
-    # Log directories
     IFS='~' read -ra LOG_DIR_ARRAY <<< "$LOG_DIRS"
 
     if [ "${#LOG_DIR_ARRAY[@]}" -eq 0 ]; then
@@ -119,15 +113,13 @@ validate_config() {
 
     fi
 
-
     log_message "INFO" "Configuration validation successful."
     log_message "INFO" "Backup enabled: $BACKUP_ENABLED"
-    log_message "INFO" "Bundle size: ${BUNDLE_PERCENT}% of filesystem capacity."
+    log_message "INFO" "Initial retention days: $RETENTION_DAYS"
 
     return 0
 }
 
-# File Sys info
 get_filesystem_info() {
 
     df -P -B1 "$MOUNT_POINT" |
@@ -137,93 +129,66 @@ get_filesystem_info() {
         }'
 }
 
-# disk usage percentage
 get_disk_usage() {
+
     get_filesystem_info | awk '{print $3}'
 }
 
-# Get filesystem capacity in bytes
-
-get_filesystem_capacity() {
-
-    get_filesystem_info | awk '{print $1}'
-}
-
-# Calculate dynamic bundle size
-
-calculate_bundle_size() {
-
-    local capacity="$1"
-
-    awk -v capacity="$capacity" \
-        -v percent="$BUNDLE_PERCENT" \
-        'BEGIN {
-            printf "%.0f\n", capacity * percent / 100
-        }'
-}
-
-# Build dynamic deletion bundle
-
 build_bundle() {
 
-    local required_bytes="$1"
+    local days_old="$1"
+    local target_date
+
+    target_date=$(date -d "$days_old days ago" '+%Y-%m-%d')
 
     BUNDLE_FILES=()
     BUNDLE_TOTAL_BYTES=0
 
     log_message "INFO" \
-        "Building dynamic deletion bundle..."
-
-    log_message "INFO" \
-        "Target bundle size: $required_bytes bytes"
-
+        "Building bundle for date: $target_date"
 
     IFS='~' read -ra LOG_DIR_ARRAY <<< "$LOG_DIRS"
 
+    while IFS=$'\t' read -r -d '' file_date mtime file_size file_path; do
 
-    while IFS=$'\t' read -r -d '' mtime file_size file_path; do
-
-        # Add file to in-memory bundle
         BUNDLE_FILES+=("$file_path")
 
-        BUNDLE_TOTAL_BYTES=$(
-            awk -v a="$BUNDLE_TOTAL_BYTES" \
-                -v b="$file_size" \
-                'BEGIN { printf "%.0f\n", a + b }'
-        )
-
+        BUNDLE_TOTAL_BYTES=$((BUNDLE_TOTAL_BYTES + file_size))
 
         log_message "INFO" \
             "Bundle candidate: $file_path ($file_size bytes)"
-
-
-        # Stop once the required amount is accumulated
-        if [ "$BUNDLE_TOTAL_BYTES" -ge "$required_bytes" ]; then
-            break
-        fi
 
     done < <(
 
         find "${LOG_DIR_ARRAY[@]}" \
             -type f \
             -name "$FILE_PATTERN" \
-            -printf '%T@\t%s\t%p\0' 2>/dev/null |
-        sort -z -n -k1,1
+            -printf '%TY-%Tm-%Td\t%T@\t%s\t%p\0' 2>/dev/null |
+        sort -z -n -k2,2 |
+        while IFS=$'\t' read -r -d '' file_date mtime file_size file_path; do
+
+            if [ "$file_date" = "$target_date" ]; then
+                printf '%s\t%s\t%s\t%s\0' \
+                    "$file_date" \
+                    "$mtime" \
+                    "$file_size" \
+                    "$file_path"
+            fi
+
+        done
 
     )
 
-
     if [ "${#BUNDLE_FILES[@]}" -eq 0 ]; then
 
-        log_message "WARNING" \
-            "No eligible log files found."
+        log_message "INFO" \
+            "No eligible log files found for $target_date."
 
         return 1
     fi
 
-
     log_message "INFO" \
-        "Dynamic bundle created."
+        "Date bundle created: $target_date"
 
     log_message "INFO" \
         "Files selected: ${#BUNDLE_FILES[@]}"
@@ -234,7 +199,6 @@ build_bundle() {
     return 0
 }
 
-# Generate unique backup path
 get_backup_path() {
 
     local source_file="$1"
@@ -248,8 +212,6 @@ get_backup_path() {
     echo "$BACKUP_DIR/${timestamp}_$$_${file_name}"
 }
 
-# Backup one file
-
 backup_file() {
 
     local source_file="$1"
@@ -257,13 +219,11 @@ backup_file() {
     local destination
     destination=$(get_backup_path "$source_file")
 
-
     log_message "INFO" \
         "Backing up: $source_file"
 
     log_message "INFO" \
         "Destination: $destination"
-
 
     if ! cp -- "$source_file" "$destination"; then
 
@@ -273,8 +233,6 @@ backup_file() {
         return 1
     fi
 
-
-    # Check existence
     if [ ! -f "$destination" ]; then
 
         log_message "ERROR" \
@@ -283,14 +241,11 @@ backup_file() {
         return 1
     fi
 
-
-    # Check size
     local original_size
     local backup_size
 
     original_size=$(stat -c '%s' "$source_file")
     backup_size=$(stat -c '%s' "$destination")
-
 
     if [ "$original_size" -ne "$backup_size" ]; then
 
@@ -300,21 +255,18 @@ backup_file() {
         return 1
     fi
 
-
     log_message "INFO" \
         "Backup verified: $source_file"
 
     return 0
 }
 
-# Delete one file
 delete_file() {
 
     local file="$1"
 
     log_message "INFO" \
         "Deleting: $file"
-
 
     if rm -- "$file"; then
 
@@ -332,18 +284,15 @@ delete_file() {
     fi
 }
 
-# Process dynamic bundle
-
 process_bundle() {
 
     log_message "INFO" \
-        "Processing bundle..."
+        "Processing date bundle..."
 
     if [ "$BACKUP_ENABLED" = "true" ]; then
 
         log_message "INFO" \
             "Backup enabled. Starting backup phase."
-
 
         for file in "${BUNDLE_FILES[@]}"; do
 
@@ -370,17 +319,13 @@ process_bundle() {
 
     fi
 
-
     log_message "INFO" \
         "Starting deletion phase."
 
-
     local deletion_failed=0
-
 
     for file in "${BUNDLE_FILES[@]}"; do
 
-        # File may have disappeared since discovery
         if [ ! -f "$file" ]; then
 
             log_message "WARNING" \
@@ -389,14 +334,12 @@ process_bundle() {
             continue
         fi
 
-
         if ! delete_file "$file"; then
 
             deletion_failed=1
         fi
 
     done
-
 
     if [ "$deletion_failed" -eq 1 ]; then
 
@@ -406,21 +349,16 @@ process_bundle() {
         return 1
     fi
 
-
     log_message "INFO" \
-        "Bundle processed successfully."
+        "Date bundle processed successfully."
 
     return 0
 }
 
-# Perform cleanup
-
 perform_cleanup() {
 
     local usage
-    local capacity
-    local bundle_size
-
+    local current_retention_days="$RETENTION_DAYS"
 
     usage=$(get_disk_usage)
 
@@ -432,21 +370,6 @@ perform_cleanup() {
         return 1
     fi
 
-
-    capacity=$(get_filesystem_capacity)
-
-    if [ -z "$capacity" ]; then
-
-        log_message "ERROR" \
-            "Unable to determine filesystem capacity."
-
-        return 1
-    fi
-
-
-    bundle_size=$(calculate_bundle_size "$capacity")
-
-
     log_message "INFO" \
         "Current disk usage: ${usage}%"
 
@@ -454,11 +377,7 @@ perform_cleanup() {
         "Configured threshold: ${THRESHOLD}%"
 
     log_message "INFO" \
-        "Filesystem capacity: $capacity bytes"
-
-    log_message "INFO" \
-        "Dynamic bundle target: $bundle_size bytes"
-
+        "Initial retention days: ${RETENTION_DAYS}"
 
     if [ "$usage" -lt "$THRESHOLD" ]; then
 
@@ -471,19 +390,15 @@ perform_cleanup() {
         return 0
     fi
 
-    # Cleanup required
-
     log_message "WARNING" \
         "Disk usage threshold reached."
 
     log_message "INFO" \
-        "Starting dynamic bundle cleanup."
+        "Starting date-wise cleanup."
 
-
-    while true; do
+    while [ "$current_retention_days" -ge 1 ]; do
 
         usage=$(get_disk_usage)
-
 
         if [ -z "$usage" ]; then
 
@@ -493,8 +408,6 @@ perform_cleanup() {
             return 1
         fi
 
-        # Stop when below threshold
-
         if [ "$usage" -lt "$THRESHOLD" ]; then
 
             log_message "INFO" \
@@ -503,37 +416,40 @@ perform_cleanup() {
             break
         fi
 
-        # Build a fresh in-memory bundle
-
-        if ! build_bundle "$bundle_size"; then
-
-            log_message "ERROR" \
-                "Unable to build deletion bundle."
-
-            return 1
-        fi
-
-        # Process bundle
-
-        if ! process_bundle; then
-
-            log_message "ERROR" \
-                "Bundle processing failed."
-
-            return 1
-        fi
-
-
         log_message "INFO" \
-            "Bundle completed. Rechecking disk usage..."
+            "Processing data from ${current_retention_days} days ago."
+
+        if build_bundle "$current_retention_days"; then
+
+            if ! process_bundle; then
+
+                log_message "ERROR" \
+                    "Bundle processing failed."
+
+                return 1
+            fi
+
+        fi
+
+        current_retention_days=$((current_retention_days - 1))
 
     done
 
+    usage=$(get_disk_usage)
+
+    if [ "$usage" -ge "$THRESHOLD" ]; then
+
+        log_message "WARNING" \
+            "Disk usage is still above threshold: ${usage}%"
+
+        log_message "WARNING" \
+            "No older retention dates available for cleanup."
+
+        return 1
+    fi
 
     return 0
 }
-
-# Acquire lock
 
 acquire_lock() {
 
@@ -547,7 +463,6 @@ acquire_lock() {
         return 1
     fi
 
-
     log_message "INFO" \
         "Lock acquired."
 
@@ -556,8 +471,6 @@ acquire_lock() {
 
     return 0
 }
-
-# Release lock
 
 release_lock() {
 
@@ -572,8 +485,6 @@ release_lock() {
 
     fi
 }
-
-# Main
 
 main() {
 
